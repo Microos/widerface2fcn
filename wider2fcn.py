@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import h5py
 from skimage import io
 import shutil, os
