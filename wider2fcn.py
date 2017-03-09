@@ -49,8 +49,7 @@ def read_wider_mat(WIDER_ROOT, SET_TYPE, MAT):
     
 def bbox_filter(bboxes, fname):
     # read: 'bboxes' of image 'fname'
-    # do: 1. filter out any problematic bboxes
-    #     2. save a fig if these are any problematic bboxes
+    # do:  filter out any problematic bboxes
     # return: correct bboxes
     sanity_indces = []
     problm_indces = []
@@ -101,14 +100,23 @@ def convert(fcn_data_dir, wider_root,  wider_mat_dir):
 #         lab_imgs =gen_label_image(filenames,WHC,img_bboxes)
 #         del WHC, img_bboxes
         txt_content = []
+        filtered_out = []
         print "Writting..."
+        
         pbar = ProgressBar(len(filenames))
         for img_path, whc, bboxes in zip(filenames, WHC, img_bboxes):
-            pbar+=1
-            #cp image
             short_name = img_path.split('/')[-1]
+            pbar+=1
+            if(WH_THRES > 0):
+                if(whc[0]>WH_THRES or whc[1]>WH_THRES):
+                    filtered_out.append(short_name) 
+                    continue #discard this image
+            #cp image
             non_ext_name = short_name.split('.')[0]
-            shutil.copyfile(img_path,  osp.join(img_dir,short_name))
+            target_path = osp.join(img_dir, short_name)
+            shutil.copyfile(img_path,  target_path)
+            if not os.path.exists(target_path):
+                print '[{}] failed'.format(img_path)
             #os.system('cp {} {}'.format(img_path, osp.join(img_dir,short_name)))
             
             #save mat
@@ -127,12 +135,15 @@ def convert(fcn_data_dir, wider_root,  wider_mat_dir):
         with open(txtname, 'w') as f:
             f.write('\n'.join(txt_content))
         del filenames,WHC,img_bboxes
+        print 'TotalNumber:',len(txt_content)
+        if len(filtered_out) != 0:
+            print 'Filtered out: \n{}'.format('\n'.join(filtered_out))
         print '\n'
 
 
 if __name__ == "__main__":
-
-	FORCE_OVERWRITE = True #if False, when the dir `$fcn.berkeleyvision.org/data/wider` exists, the program will abort instead of cleaning up the dir.
+        WH_THRES = 2000 #discard any images that have w or h over the threshold. set it to -1 to disable the filtering
+	FORCE_OVERWRITE = False #if False, when the dir `$fcn.berkeleyvision.org/data/wider` exists, the program will abort instead of cleaning up the dir.
 	fcn_data_dir = '/home/rick/Space/clone/fcn.berkeleyvision.org/data' #point to your '$fcn.berkeleyvision.org/data'
 	wider_root = '/home/rick/Documents/Models/WIDER_FACE/unzips50' #point to your wider dir which contains `WIDER_train` & `WIDER_val` folders
 	wider_mat_dir = '/home/rick/Documents/Models/WIDER_FACE/unzips/Annotations' #point to your wider mat file dir which contains `wider_face_train.mat` & `wider_face_val.mat`
