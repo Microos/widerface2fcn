@@ -109,7 +109,7 @@ def convert(fcn_data_dir, wider_root,  wider_mat_dir):
             pbar+=1
             if(WH_THRES > 0):
                 if(whc[0]>WH_THRES or whc[1]>WH_THRES):
-                    filtered_out.append(short_name) 
+                    filtered_out.append(short_name+"({}x{})".format(whc[0],whc[1])) 
                     continue #discard this image
             #cp image
             non_ext_name = short_name.split('.')[0]
@@ -142,7 +142,7 @@ def convert(fcn_data_dir, wider_root,  wider_mat_dir):
 
 
 if __name__ == "__main__":
-        WH_THRES = 2000 #discard any images that have w or h over the threshold. set it to -1 to disable the filtering
+    WH_THRES = 2000 #discard any images that have w or h over the threshold. set it to -1 to disable the filtering
 	FORCE_OVERWRITE = False #if False, when the dir `$fcn.berkeleyvision.org/data/wider` exists, the program will abort instead of cleaning up the dir.
 	fcn_data_dir = '/home/rick/Space/clone/fcn.berkeleyvision.org/data' #point to your '$fcn.berkeleyvision.org/data'
 	wider_root = '/home/rick/Documents/Models/WIDER_FACE/unzips50' #point to your wider dir which contains `WIDER_train` & `WIDER_val` folders
